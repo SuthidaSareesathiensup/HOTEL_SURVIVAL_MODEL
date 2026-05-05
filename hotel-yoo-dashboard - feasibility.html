@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Hotel Yoo & Co — Survival Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #f8f9fc;
+    --bg2: #ffffff;
+    --bg3: #f1f4f9;
+    --border: #e2e8f2;
+    --border2: #c8d6e8;
+    --text: #1a2234;
+    --text2: #4a5f7a;
+    --text3: #8899b5;
+    --gold: #c49a00;
+    --gold2: #a07800;
+    --teal: #0a9e86;
+    --teal2: #087a68;
+    --red: #d9234a;
+    --red2: #a01535;
+    --orange: #d96a10;
+    --green: #16a34a;
+    --green2: #14532d;
+    --blue: #2563eb;
+    --blue2: #1d4ed8;
+    --purple: #7c3aed;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', 'Noto Sans Thai', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #f0f4fa 0%, #e8eef8 50%, #f2f5fb 100%);
+    border-bottom: 1px solid var(--border2);
+    padding: 16px 20px;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .header-left h1 {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(13px, 3.5vw, 18px);
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+  .header-left p {
+    font-size: 11px; color: var(--text3);
+    margin-top: 2px; letter-spacing: 0.5px;
+  }
+  .header-badge {
+    background: rgba(217,35,74,0.1);
+    border: 1px solid var(--red2);
+    color: var(--red);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    overflow-x: auto;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+    gap: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .tab:hover { color: var(--text2); }
+  .tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* CONTENT */
+  .page { display: none; padding: 16px; }
+  .page.active { display: block; }
+
+  /* ALERT BANNER */
+  .alert {
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 12px; line-height: 1.5;
+  }
+  .alert-red { background: rgba(217,35,74,0.08); border: 1px solid rgba(217,35,74,0.25); color: #d9234a; }
+  .alert-orange { background: rgba(217,106,16,0.08); border: 1px solid rgba(217,106,16,0.22); color: #c05a00; }
+  .alert-green { background: rgba(22,163,74,0.08); border: 1px solid rgba(22,163,74,0.22); color: #15803d; }
+  .alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* KPI GRID */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .kpi-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    transition: border-color 0.2s;
+  }
+  .kpi-card:hover { border-color: var(--border2); }
+  .kpi-label { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; line-height: 1.3; }
+  .kpi-value { font-family: 'Space Mono', monospace; font-size: clamp(16px, 4vw, 22px); font-weight: 700; line-height: 1; }
+  .kpi-sub { font-size: 10px; color: var(--text3); margin-top: 4px; }
+  .kpi-green .kpi-value { color: var(--green); }
+  .kpi-red .kpi-value { color: var(--red); }
+  .kpi-orange .kpi-value { color: var(--orange); }
+  .kpi-gold .kpi-value { color: var(--gold); }
+  .kpi-teal .kpi-value { color: var(--teal); }
+  .kpi-blue .kpi-value { color: var(--blue); }
+
+  /* SECTION TITLES */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text3);
+    margin: 16px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::before {
+    content: '';
+    width: 3px; height: 14px;
+    background: var(--gold);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* CARD */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text2);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* CHART CONTAINER */
+  .chart-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  canvas { max-width: 100%; }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .data-table th {
+    background: var(--bg3);
+    color: var(--text3);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .data-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(200,214,232,0.4);
+    color: var(--text);
+    vertical-align: top;
+    line-height: 1.4;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .mono { font-family: 'Space Mono', monospace; font-size: 11px; }
+
+  /* STATUS BADGES */
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-green { background: rgba(22,163,74,0.1); color: var(--green); }
+  .badge-red { background: rgba(217,35,74,0.1); color: var(--red); }
+  .badge-orange { background: rgba(255,140,66,0.15); color: var(--orange); }
+  .badge-gold { background: rgba(196,154,0,0.12); color: var(--gold); }
+  .badge-blue { background: rgba(37,99,235,0.1); color: var(--blue); }
+
+  /* PROGRESS BAR */
+  .progress-wrap { margin-bottom: 10px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .progress-bar { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+
+  /* TIMELINE ITEM */
+  .timeline-item {
+    display: flex; gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .timeline-content { flex: 1; min-width: 0; }
+  .timeline-title { font-size: 12px; font-weight: 600; color: var(--text); }
+  .timeline-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* STRESS TEST */
+  .stress-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    padding: 10px;
+    background: var(--bg3);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    align-items: start;
+  }
+  .stress-name { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+  .stress-desc { font-size: 11px; color: var(--text3); line-height: 1.4; }
+
+  /* LOAN AMORTIZATION PREVIEW */
+  .loan-stat {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .loan-stat:last-child { border-bottom: none; }
+  .loan-stat-label { color: var(--text2); }
+  .loan-stat-value { font-family: 'Space Mono', monospace; color: var(--text); font-size: 11px; }
+
+  /* RESPONSIVE HELPERS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media(max-width:480px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* VERDICT PANEL */
+  .verdict-panel {
+    background: linear-gradient(135deg, rgba(196,154,0,0.08), rgba(245,200,66,0.03));
+    border: 1px solid rgba(196,154,0,0.22);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .verdict-panel h3 { color: var(--gold); font-size: 13px; margin-bottom: 8px; }
+  .verdict-panel p { font-size: 12px; color: var(--text2); line-height: 1.6; }
+
+  /* CASHFLOW BAR CHART (inline SVG-style) */
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 80px;
+    padding: 8px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .bar-item {
+    display: flex; flex-direction: column; align-items: center;
+    flex-shrink: 0;
+    gap: 2px;
+  }
+  .bar-fill {
+    width: 14px;
+    border-radius: 3px 3px 0 0;
+    transition: height 0.5s ease;
+    cursor: pointer;
+  }
+  .bar-label { font-size: 8px; color: var(--text3); writing-mode: vertical-lr; transform: rotate(180deg); }
+
+  /* INFO TOOLTIP */
+  .info-row {
+    display: flex; justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(200,214,232,0.35);
+    font-size: 12px;
+    gap: 10px;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-key { color: var(--text2); flex: 0 0 auto; max-width: 55%; line-height: 1.4; }
+  .info-val { color: var(--text); text-align: right; font-family: 'Space Mono', monospace; font-size: 11px; word-break: break-word; }
+  .info-val.green { color: var(--green); }
+  .info-val.red { color: var(--red); }
+  .info-val.orange { color: var(--orange); }
+  .info-val.gold { color: var(--gold); }
+
+  /* SCROLL HINT */
+  .scroll-hint {
+    font-size: 10px; color: var(--text3);
+    text-align: right; margin-top: 4px;
+    display: none;
+  }
+  @media(max-width:600px) { .scroll-hint { display: block; } }
+
+  /* CAPEX CATEGORY BAR */
+  .capex-bar {
+    display: flex; gap: 2px; height: 20px; border-radius: 4px; overflow: hidden;
+    margin: 10px 0;
+  }
+  .capex-seg {
+    height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; color: rgba(255,255,255,0.8);
+    overflow: hidden; white-space: nowrap;
+    transition: flex 0.5s ease;
+    cursor: pointer;
+  }
+
+  /* SEASON CALENDAR */
+  .season-grid {
+    display: grid; grid-template-columns: repeat(6,1fr);
+    gap: 4px; margin-top: 8px;
+  }
+  .season-cell {
+    padding: 6px 4px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .season-peak { background: rgba(196,154,0,0.14); color: var(--gold); border: 1px solid rgba(245,200,66,0.4); }
+  .season-high { background: rgba(37,99,235,0.1); color: var(--blue); border: 1px solid rgba(96,165,250,0.3); }
+  .season-shoulder { background: rgba(124,58,237,0.1); color: var(--purple); border: 1px solid rgba(192,132,252,0.3); }
+  .season-low { background: rgba(148,163,184,0.2); color: var(--text3); border: 1px solid var(--border); }
+
+  /* FOOTNOTE */
+  .footnote {
+    font-size: 10px; color: var(--text3);
+    text-align: center;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  /* COMPARISON ROW */
+  .compare-row {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px; text-align: center;
+    margin: 8px 0;
+  }
+  .compare-cell {
+    background: var(--bg3);
+    border-radius: 8px;
+    padding: 10px 6px;
+  }
+  .compare-cell .val { font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; }
+  .compare-cell .lbl { font-size: 9px; color: var(--text3); margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>🏨 Hotel Yoo & Co</h1>
+    <p>Phuket Old Town · Feasibility Model v1.0</p>
+  </div>
+  <div class="header-badge">IN PROGRESS</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showPage('summary')">📊 สรุป</div>
+  <div class="tab" onclick="showPage('cashflow')">💰 Cashflow</div>
+  <div class="tab" onclick="showPage('revenue')">📈 Revenue</div>
+  <div class="tab" onclick="showPage('debt')">🏦 Debt</div>
+  <div class="tab" onclick="showPage('capex')">🔨 CAPEX</div>
+  <div class="tab" onclick="showPage('stress')">⚡ Stress</div>
+  <div class="tab" onclick="showPage('household')">👨‍👩‍👧 ครอบครัว</div>
+  <div class="tab" onclick="showPage('timeline')">📅 Timeline</div>
+</div>
+
+<!-- ======== PAGE: SUMMARY ======== -->
+<div class="page active" id="page-summary">
+
+  <div class="alert alert-red">
+    <span class="alert-icon">🚨</span>
+    <div><strong>ต้องการเงินทุนเพิ่ม</strong> — เงินสดติดลบ -85,700 บาทในเดือน พ.ย. 2569 ก่อนเปิดโรงแรม ต้องการ rescuing capital หรือเลื่อนการจ่ายงวดสุดท้ายไปเดือน ธ.ค.</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-gold">
+      <div class="kpi-label">DSCR เฉลี่ย</div>
+      <div class="kpi-value">1.59</div>
+      <div class="kpi-sub">เป้าหมาย ≥ 1.35 ✅</div>
+    </div>
+    <div class="kpi-card kpi-teal">
+      <div class="kpi-label">เงินสดปิด ปีที่ 3</div>
+      <div class="kpi-value">1.98M</div>
+      <div class="kpi-sub">บาท (พ.ย. 2572)</div>
+    </div>
+    <div class="kpi-card kpi-green">
+      <div class="kpi-label">FCF รวม 36 เดือน</div>
+      <div class="kpi-value">2.07M</div>
+      <div class="kpi-sub">บาท</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-label">รายรับรวม 36M</div>
+      <div class="kpi-value">7.65M</div>
+      <div class="kpi-sub">บาท (net aft. rep ramp)</div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-label">เดือนต่ำกว่า 300K</div>
+      <div class="kpi-value">9</div>
+      <div class="kpi-sub">เดือน ⚠️ ต้อง pivot</div>
+    </div>
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">เปิดโรงแรม</div>
+      <div class="kpi-value">ธ.ค. 69</div>
+      <div class="kpi-sub">อีก 7 เดือน</div>
+    </div>
+  </div>
+
+  <div class="verdict-panel">
+    <h3>⚖️ คำตัดสินโครงการโดยรวม</h3>
+    <p>โครงการ <strong style="color:var(--green)">ผ่านได้</strong> ภายใต้เงื่อนไข — DSCR 1.59 สูงกว่าเป้า, เงินสดปิดที่ 1.98M แข็งแกร่ง, ผลตอบแทนครอบครัว 1MB คืนใน 17 เดือน สร้างความมั่งคั่ง 3.1M ภายใน 3 ปี อย่างไรก็ตาม ช่วง <strong style="color:var(--orange)">Low Season ปีแรก</strong> เงินสดต่ำกว่าขีดต่ำสุด 9 เดือน ต้อง <strong style="color:var(--teal)">Pivot ไป Long Stay</strong> เดือน พ.ค.–ก.ย. ความเสี่ยงเดียวที่ทำโครงการล้มเหลวคือ <strong style="color:var(--red)">Combined Stress S-007</strong></p>
+  </div>
+
+  <div class="section-title">สถานะปัจจุบัน</div>
+  <div class="card">
+    <div class="two-col">
+      <div>
+        <div class="info-row"><span class="info-key">สถานะโมเดล</span><span class="info-val gold">IN PROGRESS</span></div>
+        <div class="info-row"><span class="info-key">อัปเดตล่าสุด</span><span class="info-val">4 พ.ค. 2569</span></div>
+        <div class="info-row"><span class="info-key">ผู้จัดทำ</span><span class="info-val">Suthida</span></div>
+        <div class="info-row"><span class="info-key">ใบอนุญาตก่อสร้าง</span><span class="info-val green">อนุมัติแล้ว ✅</span></div>
+        <div class="info-row"><span class="info-key">ใบอนุญาตโรงแรม</span><span class="info-val orange">รอเทศบาล ⚠️</span></div>
+      </div>
+      <div>
+        <div class="info-row"><span class="info-key">Loan 1 Status</span><span class="info-val green">จ่ายอยู่ ✅</span></div>
+        <div class="info-row"><span class="info-key">Loan 2 Status</span><span class="info-val orange">รอธนาคาร ⏳</span></div>
+        <div class="info-row"><span class="info-key">Rate Reset Date</span><span class="info-val">ก.ค. 2571</span></div>
+        <div class="info-row"><span class="info-key">เดือนจนถึง Reset</span><span class="info-val gold">26 เดือน</span></div>
+        <div class="info-row"><span class="info-key">ผู้รับเหมา</span><span class="info-val orange">กำลังหา 🔍</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">ตัวชี้วัดสำคัญ</div>
+  <div class="card">
+    <div class="progress-wrap">
+      <div class="progress-label"><span>DSCR (1.59 / เป้า 1.35)</span><span style="color:var(--green)">✅ ผ่าน</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:85%;background:var(--green)"></div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Cashflow Coverage (FCF / Survival Floor)</span><span style="color:var(--orange)">⚠️ 54.7%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:54.7%;background:var(--orange)"></div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>CAPEX vs Revised Budget (5.35M / 5.30M)</span><span style="color:var(--red)">🚨 เกิน 46,900</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:101%;background:var(--red)"></div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label"><span>Months Above Survival Floor (21/36)</span><span style="color:var(--blue)">58%</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:58%;background:var(--blue)"></div></div>
+    </div>
+  </div>
+
+  <div class="section-title">ความเสี่ยงหลัก 3 ข้อ</div>
+  <div class="alert alert-red">
+    <span class="alert-icon">①</span>
+    <div><strong>Gap ก่อนเปิด 85,700 บาท</strong> — เดือน พ.ย. 2569 เงินสดติดลบ แก้โดยเลื่อนเวลาส่ง contribution ของครอบครัว</div>
+  </div>
+  <div class="alert alert-orange">
+    <span class="alert-icon">②</span>
+    <div><strong>Low Season Year 1</strong> — เดือน พ.ค.–ก.ย. 2570 รายรับต่ำกว่า debt service → <strong>Pivot ไป Long Stay 20,000/ห้อง/เดือน</strong> เพิ่มรายรับ 93,176 บาทใน 6 เดือน</div>
+  </div>
+  <div class="alert alert-orange">
+    <span class="alert-icon">③</span>
+    <div><strong>Combined Stress S-007</strong> — หากทุกอย่างแย่พร้อมกัน (Occ -15%, ADR -15%, CAPEX +10%) โครงการล้มเหลว → ต้องสะสมเงินสำรอง 500K ในช่วง Peak แรก</div>
+  </div>
+</div>
+
+<!-- ======== PAGE: CASHFLOW ======== -->
+<div class="page" id="page-cashflow">
+
+  <div class="alert alert-orange">
+    <span class="alert-icon">⚠️</span>
+    <div>Revised Scenario (CAPEX 5.3M + ครอบครัว 1MB): เงินสดติดลบในเดือนสุดท้ายก่อนเปิด -85,700 บาท แต่ฟื้นตัวเดือนที่ 4 หลังเปิด</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-green">
+      <div class="kpi-label">FCF รวม 36M</div>
+      <div class="kpi-value">2.07M</div>
+      <div class="kpi-sub">บาท</div>
+    </div>
+    <div class="kpi-card kpi-teal">
+      <div class="kpi-label">เงินสดปิด</div>
+      <div class="kpi-value">1.98M</div>
+      <div class="kpi-sub">พ.ย. 2572</div>
+    </div>
+    <div class="kpi-card kpi-gold">
+      <div class="kpi-label">DSCR เฉลี่ย</div>
+      <div class="kpi-value">1.59</div>
+      <div class="kpi-sub">เป้า ≥ 1.35</div>
+    </div>
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">เดือนต่ำกว่า 300K</div>
+      <div class="kpi-value">9</div>
+      <div class="kpi-sub">เดือน</div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-label">FCF ต่ำสุด</div>
+      <div class="kpi-value">-85.7K</div>
+      <div class="kpi-sub">พ.ย. 2569</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-label">Debt Service รวม</div>
+      <div class="kpi-value">3.52M</div>
+      <div class="kpi-sub">36 เดือน</div>
+    </div>
+  </div>
+
+  <!-- CASHFLOW CHART -->
+  <div class="card">
+    <div class="card-title">📊 เงินสดคงเหลือ 36 เดือน (หลังเปิด ธ.ค. 2569)</div>
+    <div class="scroll-hint">← เลื่อนดูเพิ่มเติม</div>
+    <div class="chart-wrap">
+      <canvas id="cashflowChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- Monthly FCF Chart -->
+  <div class="card">
+    <div class="card-title">📉 Free Cashflow รายเดือน (หลัง OPEX + Debt Service)</div>
+    <div class="chart-wrap">
+      <canvas id="fcfChart" height="180"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">สรุปกระแสเงินสด</div>
+  <div class="card">
+    <div class="info-row"><span class="info-key">เงินสดเปิดต้น (พ.ค. 2569)</span><span class="info-val">500,000 บาท</span></div>
+    <div class="info-row"><span class="info-key">รับเงินกู้รวม</span><span class="info-val green">5,500,000 บาท</span></div>
+    <div class="info-row"><span class="info-key">รายรับรวม 36 เดือน</span><span class="info-val green">7,650,408 บาท</span></div>
+    <div class="info-row"><span class="info-key">OPEX รวม 36 เดือน</span><span class="info-val red">2,061,294 บาท</span></div>
+    <div class="info-row"><span class="info-key">Debt Service รวม</span><span class="info-val red">3,520,800 บาท</span></div>
+    <div class="info-row"><span class="info-key">CAPEX ที่ใช้ไป</span><span class="info-val red">5,300,000 บาท</span></div>
+    <div class="info-row"><span class="info-key">FCF เฉลี่ยต่อเดือน</span><span class="info-val gold">57,453 บาท</span></div>
+    <div class="info-row"><span class="info-key">เงินสดปิด พ.ย. 2572</span><span class="info-val teal" style="color:var(--teal)">1,982,613 บาท ✅</span></div>
+  </div>
+
+  <div class="alert alert-green" style="margin-top:12px;">
+    <span class="alert-icon">📌</span>
+    <div><strong>Upside ที่ยังไม่ได้นับ: ค่าเช่าพื้นที่ชั้น 1</strong> — หากเช่าได้ ~25,000–35,000 บาท/เดือน จะลด household gap จาก 40,347 เหลือ ~5,000–15,000 บาท/เดือน และช่วยให้เดือนที่เงินสดต่ำมีความปลอดภัยมากขึ้น ยังไม่รวมในโมเดลเพราะยังไม่มีสัญญาจริง</div>
+  </div>
+
+  <div class="section-title">ช่วง Pre-Opening (พ.ค.–พ.ย. 2569)</div>
+  <div class="card">
+    <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead><tr><th>เดือน</th><th>เปิดต้น</th><th>เงินกู้รับ/CAPEX</th><th>Burn</th><th>ปิดท้าย</th><th>สถานะ</th></tr></thead>
+      <tbody>
+        <tr><td>พ.ค. 69</td><td class="mono">500,000</td><td class="mono">—</td><td class="mono red" style="color:var(--red)">-78,900</td><td class="mono">421,100</td><td><span class="badge badge-green">✅ OK</span></td></tr>
+        <tr><td>มิ.ย. 69</td><td class="mono">421,100</td><td class="mono green" style="color:var(--green)">+5,500,000</td><td class="mono red" style="color:var(--red)">-117,800</td><td class="mono">5,203,300</td><td><span class="badge badge-green">✅ OK</span></td></tr>
+        <tr><td>ก.ค. 69</td><td class="mono">5,203,300</td><td class="mono red" style="color:var(--red)">CAPEX -1M</td><td class="mono red" style="color:var(--red)">-117,800</td><td class="mono">4,085,500</td><td><span class="badge badge-green">✅ OK</span></td></tr>
+        <tr><td>ส.ค. 69</td><td class="mono">4,085,500</td><td class="mono red" style="color:var(--red)">CAPEX -1.2M</td><td class="mono red" style="color:var(--red)">-117,800</td><td class="mono">2,767,700</td><td><span class="badge badge-green">✅ OK</span></td></tr>
+        <tr><td>ก.ย. 69</td><td class="mono">2,767,700</td><td class="mono red" style="color:var(--red)">CAPEX -1.2M</td><td class="mono red" style="color:var(--red)">-117,800</td><td class="mono">1,449,900</td><td><span class="badge badge-green">✅ OK</span></td></tr>
+        <tr><td>ต.ค. 69</td><td class="mono">1,449,900</td><td class="mono red" style="color:var(--red)">CAPEX -700K</td><td class="mono red" style="color:var(--red)">-117,800</td><td class="mono">632,100</td><td><span class="badge badge-green">✅ OK</span></td></tr>
+        <tr><td>พ.ย. 69</td><td class="mono">632,100</td><td class="mono red" style="color:var(--red)">CAPEX -600K</td><td class="mono red" style="color:var(--red)">-117,800</td><td class="mono" style="color:var(--red)">-85,700</td><td><span class="badge badge-red">🚨 ติดลบ</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ======== PAGE: REVENUE ======== -->
+<div class="page" id="page-revenue">
+
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-gold">
+      <div class="kpi-label">รายรับ Gross 36M</div>
+      <div class="kpi-value">9.28M</div>
+      <div class="kpi-sub">บาท</div>
+    </div>
+    <div class="kpi-card kpi-teal">
+      <div class="kpi-label">Net Adjusted 36M</div>
+      <div class="kpi-value">7.65M</div>
+      <div class="kpi-sub">หักค่า OTA + rep ramp</div>
+    </div>
+    <div class="kpi-card kpi-green">
+      <div class="kpi-label">เฉลี่ยต่อเดือน</div>
+      <div class="kpi-value">212K</div>
+      <div class="kpi-sub">บาท</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-label">Survival Floor</div>
+      <div class="kpi-value">105K</div>
+      <div class="kpi-sub">บาท/เดือน</div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-label">OTA Commission</div>
+      <div class="kpi-value">1.18M</div>
+      <div class="kpi-sub">บาท 36 เดือน</div>
+    </div>
+    <div class="kpi-card kpi-purple" style="--kpi-color:var(--purple)">
+      <div class="kpi-label">Gross RevPAR (Private Y1)</div>
+      <div class="kpi-value" style="color:var(--purple)">931</div>
+      <div class="kpi-sub">฿/ห้อง/คืน (available)</div>
+    </div>
+  </div>
+
+  <div class="section-title">RevPAR Dashboard — Private Rooms vs Dorm Beds</div>
+
+  <!-- Definition pill row -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+    <span class="badge" style="background:rgba(196,154,0,0.12);color:var(--gold);border:1px solid rgba(196,154,0,0.3);">Gross RevPAR = ADR × OCC</span>
+    <span class="badge" style="background:rgba(37,99,235,0.08);color:var(--blue);border:1px solid rgba(37,99,235,0.2);">Net RevPAR = Gross − OTA Commission</span>
+    <span class="badge" style="background:rgba(22,163,74,0.1);color:var(--green);border:1px solid rgba(22,163,74,0.25);">Adj Net RevPAR = Net × Rep Ramp</span>
+  </div>
+
+  <!-- PRIVATE ROOMS -->
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;">
+    <div style="padding:10px 14px 8px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">
+      <span style="font-size:16px;">🏠</span>
+      <div>
+        <div style="font-weight:700;font-size:13px;color:var(--text);">Private Rooms — 6 ห้อง</div>
+        <div style="font-size:10px;color:var(--text3);">฿/ห้อง/คืน บน available nights ทั้งปี (6 × 365 = 2,190 คืน)</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <table class="data-table" style="min-width:500px;">
+      <thead>
+        <tr>
+          <th style="min-width:160px;">Layer</th>
+          <th style="text-align:right;min-width:80px;">ปีที่ 1</th>
+          <th style="text-align:right;min-width:80px;">ปีที่ 2</th>
+          <th style="text-align:right;min-width:80px;">ปีที่ 3</th>
+          <th style="text-align:right;min-width:90px;">Y1→Y3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:rgba(196,154,0,0.05);">
+          <td>
+            <div style="font-weight:600;color:var(--gold);">Gross RevPAR</div>
+            <div style="font-size:10px;color:var(--text3);">ADR × OCC — ก่อนหัก OTA &amp; ramp</div>
+          </td>
+          <td class="mono" style="text-align:right;color:var(--gold);font-size:13px;">฿931</td>
+          <td class="mono" style="text-align:right;color:var(--gold);font-size:13px;">฿936</td>
+          <td class="mono" style="text-align:right;color:var(--gold);font-size:13px;">฿931</td>
+          <td class="mono" style="text-align:right;color:var(--text3);">±0%</td>
+        </tr>
+        <tr>
+          <td>
+            <div style="font-weight:600;color:var(--text2);">− OTA Commission</div>
+            <div style="font-size:10px;color:var(--text3);">14% Y1 → 13% Y2 → 11% Y3</div>
+          </td>
+          <td class="mono" style="text-align:right;color:var(--red);">−฿130</td>
+          <td class="mono" style="text-align:right;color:var(--red);">−฿122</td>
+          <td class="mono" style="text-align:right;color:var(--red);">−฿102</td>
+          <td class="mono" style="text-align:right;color:var(--green);">−21.5% ✓</td>
+        </tr>
+        <tr style="background:rgba(37,99,235,0.04);">
+          <td>
+            <div style="font-weight:600;color:var(--blue);">Net RevPAR (after OTA)</div>
+            <div style="font-size:10px;color:var(--text3);">รายรับหลังหักค่า OTA</div>
+          </td>
+          <td class="mono" style="text-align:right;color:var(--blue);font-size:13px;">฿801</td>
+          <td class="mono" style="text-align:right;color:var(--blue);font-size:13px;">฿815</td>
+          <td class="mono" style="text-align:right;color:var(--blue);font-size:13px;">฿829</td>
+          <td class="mono" style="text-align:right;color:var(--green);">+3.5% ↑</td>
+        </tr>
+        <tr>
+          <td>
+            <div style="font-weight:600;color:var(--text2);">− Reputation Ramp Impact</div>
+            <div style="font-size:10px;color:var(--text3);">0.60→1.0 ช่วง 6 เดือนแรก (Y1 เท่านั้น)</div>
+          </td>
+          <td class="mono" style="text-align:right;color:var(--red);">−฿141</td>
+          <td class="mono" style="text-align:right;color:var(--text3);">฿0</td>
+          <td class="mono" style="text-align:right;color:var(--text3);">฿0</td>
+          <td class="mono" style="text-align:right;">—</td>
+        </tr>
+        <tr style="background:rgba(22,163,74,0.05);">
+          <td>
+            <div style="font-weight:700;color:var(--green);">Adj Net RevPAR ✅</div>
+            <div style="font-size:10px;color:var(--text3);">ตัวเลขที่เข้า pocket จริง</div>
+          </td>
+          <td class="mono" style="text-align:right;color:var(--green);font-size:15px;font-weight:700;">฿660</td>
+          <td class="mono" style="text-align:right;color:var(--green);font-size:15px;font-weight:700;">฿815</td>
+          <td class="mono" style="text-align:right;color:var(--green);font-size:15px;font-weight:700;">฿829</td>
+          <td class="mono" style="text-align:right;color:var(--green);font-weight:700;">+25.6% ↑</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);border-top:1px solid var(--border);">
+      <div style="background:var(--bg2);padding:8px 12px;text-align:center;">
+        <div style="font-size:10px;color:var(--text3);">ADR เฉลี่ย</div>
+        <div style="font-family:'Space Mono',monospace;font-size:13px;color:var(--text);font-weight:700;">฿1,367</div>
+      </div>
+      <div style="background:var(--bg2);padding:8px 12px;text-align:center;">
+        <div style="font-size:10px;color:var(--text3);">Occupancy เฉลี่ย</div>
+        <div style="font-family:'Space Mono',monospace;font-size:13px;color:var(--text);font-weight:700;">62.1%</div>
+      </div>
+      <div style="background:var(--bg2);padding:8px 12px;text-align:center;">
+        <div style="font-size:10px;color:var(--text3);">OTA Efficiency Y3</div>
+        <div style="font-family:'Space Mono',monospace;font-size:13px;color:var(--green);font-weight:700;">89%</div>
+        <div style="font-size:9px;color:var(--text3);">of gross retained</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DORM BEDS -->
+  <div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;">
+    <div style="padding:10px 14px 8px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);">
+      <span style="font-size:16px;">🛏</span>
+      <div>
+        <div style="font-weight:700;font-size:13px;color:var(--text);">Dorm Beds — 10 เตียง</div>
+        <div style="font-size:10px;color:var(--text3);">฿/เตียง/คืน บน available nights ทั้งปี (10 × 365 = 3,650 คืน)</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <table class="data-table" style="min-width:500px;">
+      <thead>
+        <tr>
+          <th style="min-width:160px;">Layer</th>
+          <th style="text-align:right;min-width:80px;">ปีที่ 1</th>
+          <th style="text-align:right;min-width:80px;">ปีที่ 2</th>
+          <th style="text-align:right;min-width:80px;">ปีที่ 3</th>
+          <th style="text-align:right;min-width:90px;">Y1→Y3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:rgba(196,154,0,0.05);">
+          <td>
+            <div style="font-weight:600;color:var(--gold);">Gross RevPAR</div>
+            <div style="font-size:10px;color:var(--text3);">ADR × OCC — ก่อนหัก OTA &amp; ramp</div>
+          </td>
+          <td class="mono" style="text-align:right;color:var(--gold);font-size:13px;">฿288</td>
+          <td class="mono" style="text-align:right;color:var(--gold);font-size:13px;">฿289</td>
+          <td class="mono" style="text-align:right;color:var(--gold);font-size:13px;">฿288</td>
+          <td class="mono" style="text-align:right;color:var(--text3);">±0%</td>
+        </tr>
+        <tr>
+          <td>
+            <div style="font-weight:600;color:var(--text2);">− OTA Commission</div>
+            <div style="font-size:10px;color:var(--text3);">14% Y1 → 13% Y2 → 11% Y3</div>
+          </td>
+          <td class="mono" style="text-align:right;color:var(--red);">−฿40</td>
+          <td class="mono" style="text-align:right;color:var(--red);">−฿38</td>
+          <td class="mono" style="text-align:right;color:var(--red);">−฿32</td>
+          <td class="mono" style="text-align:right;color:var(--green);">−20.0% ✓</td>
+        </tr>
+        <tr style="background:rgba(37,99,235,0.04);">
+          <td>
+            <div style="font-weight:600;color:var(--blue);">Net RevPAR (after OTA)</div>
+            <div style="font-size:10px;color:var(--text3);">รายรับหลังหักค่า OTA</div>
+          </td>
+          <td class="mono" style="text-align:right;color:var(--blue);font-size:13px;">฿247</td>
+          <td class="mono" style="text-align:right;color:var(--blue);font-size:13px;">฿251</td>
+          <td class="mono" style="text-align:right;color:var(--blue);font-size:13px;">฿256</td>
+          <td class="mono" style="text-align:right;color:var(--green);">+3.6% ↑</td>
+        </tr>
+        <tr>
+          <td>
+            <div style="font-weight:600;color:var(--text2);">− Reputation Ramp Impact</div>
+            <div style="font-size:10px;color:var(--text3);">0.60→1.0 ช่วง 6 เดือนแรก (Y1 เท่านั้น)</div>
+          </td>
+          <td class="mono" style="text-align:right;color:var(--red);">−฿41</td>
+          <td class="mono" style="text-align:right;color:var(--text3);">฿0</td>
+          <td class="mono" style="text-align:right;color:var(--text3);">฿0</td>
+          <td class="mono" style="text-align:right;">—</td>
+        </tr>
+        <tr style="background:rgba(10,158,134,0.05);">
+          <td>
+            <div style="font-weight:700;color:var(--teal);">Adj Net RevPAR ✅</div>
+            <div style="font-size:10px;color:var(--text3);">ตัวเลขที่เข้า pocket จริง</div>
+          </td>
+          <td class="mono" style="text-align:right;color:var(--teal);font-size:15px;font-weight:700;">฿206</td>
+          <td class="mono" style="text-align:right;color:var(--teal);font-size:15px;font-weight:700;">฿251</td>
+          <td class="mono" style="text-align:right;color:var(--teal);font-size:15px;font-weight:700;">฿256</td>
+          <td class="mono" style="text-align:right;color:var(--teal);font-weight:700;">+24.3% ↑</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);border-top:1px solid var(--border);">
+      <div style="background:var(--bg2);padding:8px 12px;text-align:center;">
+        <div style="font-size:10px;color:var(--text3);">ADR เฉลี่ย</div>
+        <div style="font-family:'Space Mono',monospace;font-size:13px;color:var(--text);font-weight:700;">฿462</div>
+      </div>
+      <div style="background:var(--bg2);padding:8px 12px;text-align:center;">
+        <div style="font-size:10px;color:var(--text3);">Occupancy เฉลี่ย</div>
+        <div style="font-family:'Space Mono',monospace;font-size:13px;color:var(--text);font-weight:700;">57.1%</div>
+      </div>
+      <div style="background:var(--bg2);padding:8px 12px;text-align:center;">
+        <div style="font-size:10px;color:var(--text3);">OTA Efficiency Y3</div>
+        <div style="font-family:'Space Mono',monospace;font-size:13px;color:var(--green);font-weight:700;">89%</div>
+        <div style="font-size:9px;color:var(--text3);">of gross retained</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RevPAR waterfall chart -->
+  <div class="card">
+    <div class="card-title">📊 RevPAR Waterfall — Gross → Net → Adj Net (฿/คืน)</div>
+    <div class="chart-wrap">
+      <canvas id="revparChart" height="230"></canvas>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--text3);">
+      <span>🟡 Gross (ก่อนหักทุกอย่าง)</span>
+      <span>🔵 Net after OTA</span>
+      <span>🟢 Adj Net (pocket จริง)</span>
+    </div>
+  </div>
+
+  <!-- Insight note -->
+  <div style="background:rgba(196,154,0,0.07);border:1px solid rgba(196,154,0,0.2);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--text3);line-height:1.6;">
+    📌 <strong style="color:var(--text2);">Gross Y1≈Y3 แต่ Adj Net Y1 ต่ำกว่า Y2–3 มาก:</strong> เพราะ Rep Ramp 6 เดือนแรกกด Net ลง −฿141 (Private) และ −฿41 (Dorm) ในปีที่ 1 เท่านั้น หลังจากนั้น ramp = 1.0 Net = Adj Net &nbsp;|&nbsp; OTA commission ลดจาก 14% → 11% ทำให้ Net RevPAR ดีขึ้น 3.5% ต่อปีโดยไม่ต้องเพิ่ม ADR
+  </div>
+
+  <!-- Revenue Chart -->
+  <div class="card">
+    <div class="card-title">📊 รายรับ Adjusted Net รายเดือน (36 เดือน)</div>
+    <div class="chart-wrap">
+      <canvas id="revenueChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">รายได้ตามปี</div>
+  <div class="compare-row">
+    <div class="compare-cell">
+      <div class="val" style="color:var(--orange)">2.20M</div>
+      <div class="lbl">ปีที่ 1<br>ธ.ค.69–พ.ย.70</div>
+    </div>
+    <div class="compare-cell">
+      <div class="val" style="color:var(--blue)">2.70M</div>
+      <div class="lbl">ปีที่ 2<br>ธ.ค.70–พ.ย.71</div>
+    </div>
+    <div class="compare-cell">
+      <div class="val" style="color:var(--green)">2.75M</div>
+      <div class="lbl">ปีที่ 3<br>ธ.ค.71–พ.ย.72</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="info-row"><span class="info-key">Y1 → Y2 Growth</span><span class="info-val green">+22.9% ↑</span></div>
+    <div class="info-row"><span class="info-key">Y2 → Y3 Growth</span><span class="info-val green">+1.8% ↑</span></div>
+    <div class="info-row"><span class="info-key">เดือนที่รายรับ ≥ Floor</span><span class="info-val green">21 เดือน</span></div>
+    <div class="info-row"><span class="info-key">เดือนที่รายรับ < Floor</span><span class="info-val red">15 เดือน</span></div>
+  </div>
+
+  <div class="section-title">ปฏิทิน Seasonality</div>
+  <div class="card">
+    <div class="season-grid">
+      <div class="season-cell season-peak">ม.ค.<br>Peak</div>
+      <div class="season-cell season-peak">ก.พ.<br>Peak</div>
+      <div class="season-cell season-high">มี.ค.<br>High</div>
+      <div class="season-cell season-shoulder">เม.ย.<br>Shoulder</div>
+      <div class="season-cell season-low">พ.ค.<br>Low</div>
+      <div class="season-cell season-low">มิ.ย.<br>Low</div>
+      <div class="season-cell season-low">ก.ค.<br>Low</div>
+      <div class="season-cell season-low">ส.ค.<br>Low</div>
+      <div class="season-cell season-low">ก.ย.<br>Low</div>
+      <div class="season-cell season-shoulder">ต.ค.<br>Shoulder</div>
+      <div class="season-cell season-high">พ.ย.<br>High</div>
+      <div class="season-cell season-peak">ธ.ค.<br>Peak</div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-gold">Peak: ADR 2,000 / Occ 90%</span>
+      <span class="badge badge-blue">High: ADR 1,500 / Occ 80%</span>
+      <span class="badge" style="background:rgba(124,58,237,0.1);color:var(--purple)">Shoulder: ADR 1,200 / Occ 70%</span>
+      <span class="badge" style="background:rgba(148,163,184,0.2);color:var(--text3)">Low: ADR 1,000 / Occ 35%</span>
+    </div>
+  </div>
+
+  <div class="section-title">🔄 Long Stay Pivot — Low Season</div>
+  <div class="alert alert-green">
+    <span class="alert-icon">💡</span>
+    <div><strong>แนะนำ Pivot ไป Long Stay</strong> เดือน พ.ค.–ก.ย. 2570 — อัตรา 20,000 บาท/ห้อง/เดือน สร้างรายรับ 120,000 vs 83,979 (nightly) ประหยัดได้ <strong>93,176 บาทใน 6 เดือน</strong> Break-even rate = 17,412 บาท/ห้อง/เดือน</div>
+  </div>
+
+  <div class="section-title">OTA Channel Mix</div>
+  <div class="card">
+    <div class="info-row"><span class="info-key">Booking.com</span><span class="info-val">50% (ค่าคอม 15%)</span></div>
+    <div class="info-row"><span class="info-key">Agoda</span><span class="info-val">25% (ค่าคอม 15%)</span></div>
+    <div class="info-row"><span class="info-key">Hostelworld</span><span class="info-val">15% (ค่าคอม 12%)</span></div>
+    <div class="info-row"><span class="info-key">Direct Booking</span><span class="info-val green">10% (ค่าคอม 0%)</span></div>
+    <div class="info-row"><span class="info-key">Blended Commission ปีที่ 1</span><span class="info-val orange">14%</span></div>
+    <div class="info-row"><span class="info-key">Blended Commission ปีที่ 3</span><span class="info-val green">11%</span></div>
+  </div>
+</div>
+
+<!-- ======== PAGE: DEBT ======== -->
+<div class="page" id="page-debt">
+
+  <div class="alert alert-orange">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>Rate Reset เดือน ก.ค. 2571</strong> (อีก 26 เดือน) — อัตราดอกเบี้ยเพิ่มจาก 5.99% เป็น 7.25% ต้นทุนดอกเบี้ยเพิ่ม 30,045 บาท/ปี เริ่มเจรจา SCB ในอีก 20 เดือน</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">ยอดเงินกู้คงเหลือ L1</div>
+      <div class="kpi-value">4.87M</div>
+      <div class="kpi-sub">บาท (ปัจจุบัน)</div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-label">ผ่อนต่อเดือน L1</div>
+      <div class="kpi-value">38,900</div>
+      <div class="kpi-sub">บาท/เดือน</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-label">ผ่อนรวม 2 กู้</div>
+      <div class="kpi-value">77,800</div>
+      <div class="kpi-sub">บาท/เดือน</div>
+    </div>
+    <div class="kpi-card kpi-gold">
+      <div class="kpi-label">Fixed Rate หมด</div>
+      <div class="kpi-value">ก.ค. 71</div>
+      <div class="kpi-sub">อีก 26 เดือน</div>
+    </div>
+    <div class="kpi-card kpi-teal">
+      <div class="kpi-label">ดอกเบี้ยปัจจุบัน</div>
+      <div class="kpi-value">5.99%</div>
+      <div class="kpi-sub">ต่อปี (fixed)</div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-label">ดอกเบี้ยหลัง Reset</div>
+      <div class="kpi-value">7.25%</div>
+      <div class="kpi-sub">MRR (ลอยตัว)</div>
+    </div>
+  </div>
+
+  <div class="section-title">ข้อมูลเงินกู้</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">🔵 Loan 1 — Personal</div>
+      <div class="loan-stat"><span class="loan-stat-label">เงินต้น</span><span class="loan-stat-value">5,000,000 ฿</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">อนุมัติ</span><span class="loan-stat-value">มิ.ย. 2568</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">จ่ายแรก</span><span class="loan-stat-value">ก.ค. 2568</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">ผ่อนงวด</span><span class="loan-stat-value">38,900 ฿</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">อัตรา Fixed</span><span class="loan-stat-value">5.99% / ปี</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">Fixed ถึง</span><span class="loan-stat-value">ก.ค. 2571</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">อัตรา MRR</span><span class="loan-stat-value">7.25% / ปี</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">ปิดเงินกู้</span><span class="loan-stat-value">ต.ค. 2587</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">สถานะ</span><span class="loan-stat-value" style="color:var(--green)">จ่ายอยู่ ✅</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🟡 Loan 2 — Construction</div>
+      <div class="loan-stat"><span class="loan-stat-label">เงินต้น</span><span class="loan-stat-value">5,000,000 ฿</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">วัตถุประสงค์</span><span class="loan-stat-value">ก่อสร้างโรงแรม</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">ผ่อนงวด</span><span class="loan-stat-value">38,900 ฿</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">อัตรา</span><span class="loan-stat-value">5.99% / ปี</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">สถานะ</span><span class="loan-stat-value" style="color:var(--orange)">รอธนาคาร ⏳</span></div>
+      <div class="loan-stat"><span class="loan-stat-label">อนุมัติคาด</span><span class="loan-stat-value">TBC</span></div>
+      <div class="loan-stat" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><span class="loan-stat-label" style="color:var(--orange)">⚠️ Note</span><span class="loan-stat-value" style="color:var(--orange);font-family:'DM Sans';font-size:11px;">CAPEX เกิน Hard Cap — ต้องเจรจาผู้รับเหมา</span></div>
+    </div>
+  </div>
+
+  <!-- Loan Chart -->
+  <div class="card">
+    <div class="card-title">📉 ยอดคงเหลือ Loan 1 (232 งวด)</div>
+    <div class="chart-wrap">
+      <canvas id="loanChart" height="200"></canvas>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge badge-blue">Fixed 5.99% (งวด 1-36)</span>
+      <span class="badge badge-orange">MRR 7.25% (งวด 37+)</span>
+    </div>
+  </div>
+
+  <div class="section-title">วิเคราะห์ Rate Reset</div>
+  <div class="card">
+    <div class="info-row"><span class="info-key">อัตราปัจจุบัน</span><span class="info-val">5.99%</span></div>
+    <div class="info-row"><span class="info-key">อัตราหลัง Reset</span><span class="info-val orange">7.25%</span></div>
+    <div class="info-row"><span class="info-key">อัตราเพิ่มขึ้น</span><span class="info-val red">+1.26%</span></div>
+    <div class="info-row"><span class="info-key">ดอกเบี้ยเพิ่มต่อเดือน</span><span class="info-val red">+2,504 บาท</span></div>
+    <div class="info-row"><span class="info-key">ดอกเบี้ยเพิ่มต่อปี</span><span class="info-val red">+30,045 บาท</span></div>
+    <div class="info-row"><span class="info-key">ยอดคงเหลือ ณ Reset (M36)</span><span class="info-val">4,451,671 บาท</span></div>
+    <div class="info-row"><span class="info-key">ต้องเตรียมตัว</span><span class="info-val gold">ภายในอีก 20 เดือน</span></div>
+  </div>
+
+  <div class="section-title">ภาระรายเดือนตามเฟส</div>
+  <div class="card">
+    <div class="info-row"><span class="info-key">ก่อนเปิด (L1 + ครอบครัว)</span><span class="info-val red">78,900 ฿/เดือน</span></div>
+    <div class="info-row"><span class="info-key">ช่วงก่อสร้าง (L1+L2+ครอบครัว)</span><span class="info-val red">117,800 ฿/เดือน</span></div>
+    <div class="info-row"><span class="info-key">Operating Phase (L1+L2)</span><span class="info-val orange">97,800 ฿/เดือน</span></div>
+    <div class="info-row"><span class="info-key">Survival Floor (DSCR 1.35)</span><span class="info-val gold">105,030 ฿/เดือน</span></div>
+  </div>
+</div>
+
+<!-- ======== PAGE: CAPEX ======== -->
+<div class="page" id="page-capex">
+
+  <div class="alert alert-red">
+    <span class="alert-icon">🚨</span>
+    <div><strong>CAPEX เกิน Hard Cap ทุก Scenario</strong> — Base 6.28M เกิน 4.5M Hard Cap 1.78M บาท Revised Scenario ลดเหลือ 5.35M แต่ยังเกิน Budget 46,900 บาท ต้องเจรจาผู้รับเหมาเพิ่มเติม</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">Grand Total (Base)</div>
+      <div class="kpi-value">6.28M</div>
+      <div class="kpi-sub">รวม VAT+OH ฿</div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-label">Revised Total</div>
+      <div class="kpi-value">5.35M</div>
+      <div class="kpi-sub">หลังลดขอบเขต ฿</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-label">Hard Cap</div>
+      <div class="kpi-value">4.50M</div>
+      <div class="kpi-sub">บาท</div>
+    </div>
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">Shortfall (Base)</div>
+      <div class="kpi-value">-1.78M</div>
+      <div class="kpi-sub">บาท เกิน Cap</div>
+    </div>
+    <div class="kpi-card kpi-green">
+      <div class="kpi-label">VAT+OH Rate</div>
+      <div class="kpi-value">17%</div>
+      <div class="kpi-sub">7%+10%</div>
+    </div>
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">High Risk Items</div>
+      <div class="kpi-value">34.5%</div>
+      <div class="kpi-sub">ของ Grand Total ⚠️</div>
+    </div>
+  </div>
+
+  <!-- CAPEX Breakdown Chart -->
+  <div class="card">
+    <div class="card-title">🏗️ สัดส่วน CAPEX ตามหมวด</div>
+    <div class="chart-wrap">
+      <canvas id="capexChart" height="250"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">สรุป CAPEX ตามระดับราคา</div>
+  <div class="compare-row">
+    <div class="compare-cell">
+      <div class="val" style="color:var(--green)">5.22M</div>
+      <div class="lbl">Low<br>฿ incl VAT+OH</div>
+    </div>
+    <div class="compare-cell">
+      <div class="val" style="color:var(--orange)">6.28M</div>
+      <div class="lbl">Base<br>฿ incl VAT+OH</div>
+    </div>
+    <div class="compare-cell">
+      <div class="val" style="color:var(--red)">7.34M</div>
+      <div class="lbl">High<br>฿ incl VAT+OH</div>
+    </div>
+  </div>
+
+  <div class="section-title">รายการ CAPEX ทั้งหมด</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="overflow-x:auto;">
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>หมวด</th><th>รายละเอียด</th><th>Base (฿)</th><th>Risk</th><th>Critical</th></tr></thead>
+      <tbody>
+        <tr><td>C-001</td><td>Structural</td><td>บันไดหนีไฟ + รื้อถอน</td><td class="mono">500,000</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-002</td><td>Structural</td><td>Dorm ชั้น 2 ปรับผัง</td><td class="mono">150,000</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-003</td><td>Electrical</td><td>เดินไฟใหม่ทั้งอาคาร</td><td class="mono">550,000</td><td><span class="badge badge-red">High</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-004</td><td>Electrical</td><td>DB1 + Sub-panels</td><td class="mono">175,000</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-005</td><td>Plumbing</td><td>ระบบประปาใหม่ทั้งหมด</td><td class="mono">300,000</td><td><span class="badge badge-red">High</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-006</td><td>Plumbing</td><td>เครื่องทำน้ำอุ่น x8</td><td class="mono">125,000</td><td><span class="badge badge-green">Low</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-007</td><td>Bathroom</td><td>ห้องน้ำ Private x6</td><td class="mono">500,000</td><td><span class="badge badge-red">High</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-008</td><td>Bathroom</td><td>ห้องน้ำ Dorm</td><td class="mono">125,000</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-009</td><td>AC System</td><td>24,000 BTU x8 ห้อง</td><td class="mono">275,000</td><td><span class="badge badge-green">Low</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-010</td><td>AC System</td><td>18,000 BTU x2</td><td class="mono">60,000</td><td><span class="badge badge-green">Low</span></td><td><span class="badge" style="background:rgba(148,163,184,0.2);color:var(--text3)">NO</span></td></tr>
+        <tr><td>C-011</td><td>Interior</td><td>ตกแต่งภายในทุกห้อง</td><td class="mono">900,000</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-012</td><td>Interior</td><td>พื้นที่ส่วนกลาง</td><td class="mono">150,000</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-013</td><td>Exterior</td><td>หน้าอาคาร (เลื่อนปีที่ 2)</td><td class="mono">700,000</td><td><span class="badge badge-green">Low</span></td><td><span class="badge" style="background:rgba(148,163,184,0.2);color:var(--text3)">NO</span></td></tr>
+        <tr><td>C-014</td><td>FF&E</td><td>เฟอร์นิเจอร์ห้อง x8</td><td class="mono">325,000</td><td><span class="badge badge-green">Low</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-015</td><td>FF&E</td><td>เตียง Dorm x10</td><td class="mono">125,000</td><td><span class="badge badge-green">Low</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-016</td><td>FF&E</td><td>เฟอร์นิเจอร์ส่วนกลาง</td><td class="mono">85,000</td><td><span class="badge badge-green">Low</span></td><td><span class="badge" style="background:rgba(148,163,184,0.2);color:var(--text3)">NO</span></td></tr>
+        <tr><td>C-017–020</td><td>Tech</td><td>WiFi, CCTV, Smart Lock, PMS</td><td class="mono">170,000</td><td><span class="badge badge-green">Low</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-021</td><td>Signage</td><td>ป้ายภายนอก (DIY)</td><td class="mono">75,000</td><td><span class="badge badge-green">Low</span></td><td><span class="badge" style="background:rgba(148,163,184,0.2);color:var(--text3)">NO</span></td></tr>
+        <tr><td>C-022</td><td>Permits</td><td>ใบอนุญาตโรงแรม</td><td class="mono">75,000</td><td><span class="badge badge-orange">Medium</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr><td>C-023</td><td>Contingency</td><td>สำรองกรณีฉุกเฉิน</td><td class="mono">500,000</td><td><span class="badge badge-red">Critical</span></td><td><span class="badge badge-red">YES</span></td></tr>
+        <tr style="background:rgba(196,154,0,0.06)"><td colspan="3"><strong>Subtotal</strong></td><td class="mono"><strong>5,365,000</strong></td><td colspan="2"></td></tr>
+        <tr><td colspan="3">VAT 7%</td><td class="mono">375,550</td><td colspan="2"></td></tr>
+        <tr><td colspan="3">OH 10%</td><td class="mono">536,500</td><td colspan="2"></td></tr>
+        <tr style="background:rgba(217,35,74,0.06)"><td colspan="3"><strong>Grand Total</strong></td><td class="mono" style="color:var(--red)"><strong>6,277,050</strong></td><td colspan="2"><span class="badge badge-red">🚨 OVER CAP</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="section-title">รายการ High Risk</div>
+  <div class="card">
+    <div class="info-row"><span class="info-key">C-003 เดินไฟใหม่</span><span class="info-val red">550,000 ฿</span></div>
+    <div class="info-row"><span class="info-key">C-007 ห้องน้ำ Private</span><span class="info-val red">500,000 ฿</span></div>
+    <div class="info-row"><span class="info-key">C-005 ระบบประปา</span><span class="info-val red">300,000 ฿</span></div>
+    <div class="info-row"><span class="info-key">C-023 Contingency</span><span class="info-val red">500,000 ฿</span></div>
+    <div class="info-row"><span class="info-key">รวม High Risk</span><span class="info-val red">1,850,000 ฿</span></div>
+    <div class="info-row"><span class="info-key">% ของ Grand Total</span><span class="info-val red">34.5% ⚠️ > 30%</span></div>
+  </div>
+</div>
+
+<!-- ======== PAGE: STRESS ======== -->
+<div class="page" id="page-stress">
+
+  <div class="alert alert-red">
+    <span class="alert-icon">💥</span>
+    <div><strong>S-007 Combined Stress — โครงการล้มเหลว</strong> หากทุกอย่างแย่พร้อมกัน (Occ -15%, ADR -15%, CAPEX +10%, ไฟ +30%) — ต้องสะสมสำรอง 500K ในช่วง Peak แรก ธ.ค.–ก.พ.</div>
+  </div>
+
+  <div class="section-title">ผลการทดสอบ Stress ทั้ง 9 Scenarios</div>
+
+  <div class="stress-row">
+    <div><div class="stress-name">S-001: Occupancy -20%</div><div class="stress-desc">ADR เท่าเดิม, Occupancy × 0.80</div><div style="margin-top:4px;font-size:11px;color:var(--text3)">FCF 20,901 | DSCR 1.15 | Cash 666K</div></div>
+    <div><span class="badge badge-orange">⚠️ Stressed</span></div>
+  </div>
+  <div class="stress-row">
+    <div><div class="stress-name">S-002: ADR -25%</div><div class="stress-desc">Occupancy เท่าเดิม, ADR × 0.75</div><div style="margin-top:4px;font-size:11px;color:var(--text3)">FCF 11,763 | DSCR 1.04 | Cash 338K</div></div>
+    <div><span class="badge badge-orange">⚠️ Stressed</span></div>
+  </div>
+  <div class="stress-row">
+    <div><div class="stress-name">S-003: เปิดช้า 3 เดือน</div><div class="stress-desc">เปิด ธ.ค.69 → มี.ค.70</div><div style="margin-top:4px;font-size:11px;color:var(--text3)">FCF 24,353 | DSCR 1.59 | Cash 791K</div></div>
+    <div><span class="badge badge-green">✅ SURVIVES</span></div>
+  </div>
+  <div class="stress-row">
+    <div><div class="stress-name">S-004: CAPEX +20%</div><div class="stress-desc">เกิน 1,060,000 บาท</div><div style="margin-top:4px;font-size:11px;color:var(--text3)">FCF 57,453 | DSCR 1.59 | Cash 923K</div></div>
+    <div><span class="badge badge-orange">⚠️ Tight</span></div>
+  </div>
+  <div class="stress-row">
+    <div><div class="stress-name">S-005: ค่าไฟ +50%</div><div class="stress-desc">12 เดือนแรก</div><div style="margin-top:4px;font-size:11px;color:var(--text3)">FCF 48,453 | DSCR 1.50 | Cash 1.66M</div></div>
+    <div><span class="badge badge-green">✅ SURVIVES</span></div>
+  </div>
+  <div class="stress-row">
+    <div><div class="stress-name">S-006: Rate เพิ่ม 9%</div><div class="stress-desc">MRR Reset ถึง 9% แทน 7.25%</div><div style="margin-top:4px;font-size:11px;color:var(--text3)">FCF 50,453 | DSCR 1.38 | Cash 1.73M</div></div>
+    <div><span class="badge badge-green">✅ SURVIVES</span></div>
+  </div>
+  <div class="stress-row" style="border:1px solid var(--red2);border-radius:8px;">
+    <div><div class="stress-name" style="color:var(--red)">S-007: Combined Stress 💀</div><div class="stress-desc">Occ -15%, ADR -15%, CAPEX +10%, ไฟ +30%</div><div style="margin-top:4px;font-size:11px;color:var(--red)">FCF -2,775 | DSCR 0.93 | Cash -715K</div></div>
+    <div><span class="badge badge-red">🚨 FAILS</span></div>
+  </div>
+  <div class="stress-row">
+    <div><div class="stress-name">S-008: Low Season Collapse</div><div class="stress-desc">Occ ลด 35% → 20%, no pivot</div><div style="margin-top:4px;font-size:11px;color:var(--text3)">FCF 47,223 | DSCR 1.59 | Cash 1.61M</div></div>
+    <div><span class="badge badge-green">✅ SURVIVES</span></div>
+  </div>
+  <div class="stress-row">
+    <div><div class="stress-name">S-009: OTA Algorithm</div><div class="stress-desc">Commission เพิ่ม 14% → 18% ปีแรก</div><div style="margin-top:4px;font-size:11px;color:var(--text3)">FCF 48,953 | DSCR 1.20 | Cash 1.68M</div></div>
+    <div><span class="badge badge-orange">⚠️ Stressed</span></div>
+  </div>
+
+  <!-- Stress Chart -->
+  <div class="card" style="margin-top:14px;">
+    <div class="card-title">📊 เปรียบเทียบ DSCR ใน Stress Scenarios</div>
+    <div class="chart-wrap">
+      <canvas id="stressChart" height="220"></canvas>
+    </div>
+    <div style="margin-top:6px;display:flex;gap:8px;align-items:center;font-size:11px;color:var(--text3)">
+      <span style="width:20px;height:3px;background:var(--red);display:inline-block;border-radius:2px"></span>
+      เส้น Target 1.35
+    </div>
+  </div>
+
+  <div class="section-title">🚨 Red Flag Triggers</div>
+  <div class="card">
+    <div class="info-row"><span class="info-key">DSCR < 1.35</span><span class="info-val green">ปัจจุบัน 1.59 ✅</span></div>
+    <div class="info-row"><span class="info-key">Cash < 300K</span><span class="info-val red">9 เดือน 🚨</span></div>
+    <div class="info-row"><span class="info-key">CAPEX เกิน 5.3M</span><span class="info-val green">อยู่ในงบ ✅</span></div>
+    <div class="info-row"><span class="info-key">เปิดช้ากว่า มี.ค. 70</span><span class="info-val orange">ต้องติดตาม ⚠️</span></div>
+    <div class="info-row"><span class="info-key">ค่าไฟ > 30K/เดือน</span><span class="info-val orange">ตรวจจากบิลจริง</span></div>
+    <div class="info-row"><span class="info-key">OTA Score < 8.0</span><span class="info-val orange">ติดตาม Dashboard</span></div>
+    <div class="info-row"><span class="info-key">Occupancy < 30%</span><span class="info-val orange">Activate Long Stay</span></div>
+  </div>
+
+  <div class="section-title">💰 Rescue Capital Calculator</div>
+  <div class="card">
+    <div class="info-row"><span class="info-key">ขั้นต่ำ (Cover gap)</span><span class="info-val orange">385,700 บาท</span></div>
+    <div class="info-row"><span class="info-key">แนะนำ (+3M buffer)</span><span class="info-val gold">679,100 บาท</span></div>
+    <div class="info-row"><span class="info-key">แหล่งที่แนะนำ</span><span class="info-val">< 500K: ขอครอบครัวก่อน<br>> 500K: เจรจา CAPEX</span></div>
+  </div>
+</div>
+
+<!-- ======== PAGE: HOUSEHOLD ======== -->
+<div class="page" id="page-household">
+
+  <div class="alert alert-orange">
+    <span class="alert-icon">👨‍👩‍👧</span>
+    <div><strong>โครงการ Viable แบบมีเงื่อนไข</strong> — ครอบครัวต้องการความช่วยเหลือภายนอก 40,347 บาท/เดือนในสถานการณ์ Base Case แต่สร้างความมั่งคั่ง 3.13M ภายใน 3 ปี</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-gold">
+      <div class="kpi-label">ครอบครัว ROI/ปี</div>
+      <div class="kpi-value">35.6%</div>
+      <div class="kpi-sub">บน equity 1MB</div>
+    </div>
+    <div class="kpi-card kpi-teal">
+      <div class="kpi-label">คืนทุน 1MB</div>
+      <div class="kpi-value">17</div>
+      <div class="kpi-sub">เดือน หลังเปิด</div>
+    </div>
+    <div class="kpi-card kpi-green">
+      <div class="kpi-label">มูลค่าทรัพย์สิน Y3</div>
+      <div class="kpi-value">9.26M</div>
+      <div class="kpi-sub">บาท (5%/ปี)</div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-label">ต้องการ Support</div>
+      <div class="kpi-value">40.3K</div>
+      <div class="kpi-sub">บาท/เดือน Base</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-label">ความมั่งคั่ง Year 3</div>
+      <div class="kpi-value">3.13M</div>
+      <div class="kpi-sub">บาท (FCF + property)</div>
+    </div>
+    <div class="kpi-card kpi-purple" style="--kpi-color:var(--purple)">
+      <div class="kpi-label">True Payback</div>
+      <div class="kpi-value" style="color:var(--purple)">8.7 ปี</div>
+      <div class="kpi-sub">เงิน 6MB ทั้งหมด</div>
+    </div>
+  </div>
+
+  <div class="section-title">ภาระรายเดือนครอบครัว</div>
+  <div class="card">
+    <div class="info-row"><span class="info-key">Loan 1 ปัจจุบัน</span><span class="info-val red">38,900 ฿/เดือน</span></div>
+    <div class="info-row"><span class="info-key">Loan 2 (เมื่ออนุมัติ)</span><span class="info-val red">38,900 ฿/เดือน</span></div>
+    <div class="info-row"><span class="info-key">ค่าใช้จ่ายครอบครัว (ก่อนเปิด)</span><span class="info-val">40,000 ฿/เดือน</span></div>
+    <div class="info-row"><span class="info-key">ค่าใช้จ่ายครอบครัว (หลังเปิด)</span><span class="info-val">20,000 ฿/เดือน (ลด)</span></div>
+    <div class="info-row"><span class="info-key">ภาระช่วงก่อสร้าง</span><span class="info-val red">117,800 ฿/เดือน 🚨</span></div>
+    <div class="info-row"><span class="info-key">ภาระ Operating Phase</span><span class="info-val orange">97,800 ฿/เดือน</span></div>
+  </div>
+
+  <div class="section-title">ผลตอบแทนสะสม Year 1-3</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <table class="data-table" style="min-width:520px;">
+      <thead>
+        <tr>
+          <th style="min-width:160px;">ผลประโยชน์</th>
+          <th style="text-align:right;min-width:100px;">ปีที่ 1<br><span style="font-weight:400;color:var(--text3);font-size:9px;">ธ.ค.69–พ.ย.70</span></th>
+          <th style="text-align:right;min-width:100px;">ปีที่ 2<br><span style="font-weight:400;color:var(--text3);font-size:9px;">ธ.ค.70–พ.ย.71</span></th>
+          <th style="text-align:right;min-width:100px;">ปีที่ 3<br><span style="font-weight:400;color:var(--text3);font-size:9px;">ธ.ค.71–พ.ย.72</span></th>
+          <th style="text-align:right;min-width:100px;">รวม 3 ปี</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div style="font-weight:600;">Hotel FCF สะสม</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">เงินสดจริงหลัง OPEX+Debt</div></td>
+          <td class="mono" style="text-align:right;color:var(--green)">357,258</td>
+          <td class="mono" style="text-align:right;color:var(--green)">841,311</td>
+          <td class="mono" style="text-align:right;color:var(--green)">869,744</td>
+          <td class="mono" style="text-align:right;color:var(--green);font-weight:700;">2,068,313</td>
+        </tr>
+        <tr>
+          <td><div style="font-weight:600;">ลดหนี้เงินต้น (ทั้ง 2 กู้)</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">equity ในทรัพย์สินเพิ่มขึ้นทุกเดือน</div></td>
+          <td class="mono" style="text-align:right;color:var(--gold)">362,565</td>
+          <td class="mono" style="text-align:right;color:var(--gold)">382,000</td>
+          <td class="mono" style="text-align:right;color:var(--gold)">403,000</td>
+          <td class="mono" style="text-align:right;color:var(--gold);font-weight:700;">1,147,565</td>
+        </tr>
+        <tr>
+          <td><div style="font-weight:600;">มูลค่าทรัพย์สินเพิ่ม (5%/ปี)</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">Old Town Phuket heritage property</div></td>
+          <td class="mono" style="text-align:right;color:var(--blue)">400,000</td>
+          <td class="mono" style="text-align:right;color:var(--blue)">420,000</td>
+          <td class="mono" style="text-align:right;color:var(--blue)">441,000</td>
+          <td class="mono" style="text-align:right;color:var(--blue);font-weight:700;">1,261,000</td>
+        </tr>
+        <tr style="background:rgba(196,154,0,0.07);">
+          <td><div style="font-weight:700;color:var(--gold);">รวมผลประโยชน์ทั้งหมด</div><div style="font-size:10px;color:var(--text3);margin-top:2px;">FCF + ลดหนี้ + มูลค่าทรัพย์</div></td>
+          <td class="mono" style="text-align:right;font-weight:700;">1,119,823</td>
+          <td class="mono" style="text-align:right;font-weight:700;">1,643,311</td>
+          <td class="mono" style="text-align:right;font-weight:700;">1,713,744</td>
+          <td class="mono" style="text-align:right;color:var(--gold);font-weight:700;font-size:13px;">4,476,878</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div style="padding:10px 12px;background:rgba(37,99,235,0.06);border-top:1px solid var(--border);font-size:11px;color:var(--text3);line-height:1.6;">
+      💡 <strong style="color:var(--text2)">True Payback 8.7 ปี ≠ รอ 8.7 ปีถึงได้เงิน</strong> — เงินเข้าทุกเดือนตั้งแต่วันแรก ตัวเลข 8.7 ปีคือเวลาที่ cumulative FCF สะสม = เงินลงทุนรวม 6MB ส่วนเงิน <strong style="color:var(--green)">ครอบครัว 1MB คืนภายใน 17 เดือน</strong>
+    </div>
+  </div>
+
+  <!-- Wealth Chart -->
+  <div class="card" style="margin-top:12px;">
+    <div class="card-title">📈 การสร้างความมั่งคั่งระยะยาว</div>
+    <div class="chart-wrap">
+      <canvas id="wealthChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="section-title">วิเคราะห์ความอยู่รอดครอบครัว</div>
+  <div class="card">
+    <div class="info-row"><span class="info-key">ตอนนี้ (ก่อน L2)</span><span class="info-val red">-78,900 ฿/เดือน 🚨</span></div>
+    <div class="info-row"><span class="info-key">ช่วงก่อสร้าง</span><span class="info-val red">-117,800 ฿/เดือน 🚨</span></div>
+    <div class="info-row"><span class="info-key">Operating Base</span><span class="info-val orange">-40,347 ฿/เดือน ⚠️</span></div>
+    <div class="info-row"><span class="info-key">Operating Stress S-001</span><span class="info-val orange">-76,899 ฿/เดือน</span></div>
+    <div class="info-row"><span class="info-key">Operating Stress S-002</span><span class="info-val orange">-86,037 ฿/เดือน</span></div>
+    <div class="info-row"><span class="info-key">Combined Worst Case</span><span class="info-val red">-100,575 ฿/เดือน 🚨</span></div>
+  </div>
+
+  <div class="section-title">💡 Key Insight</div>
+  <div class="verdict-panel">
+    <h3>📌 ข้อสรุปสำคัญ</h3>
+    <p>ครอบครัวได้รับผลตอบแทนจริงตั้งแต่เดือนแรก ไม่ใช่แค่หลัง 8.7 ปี — ตัวเลข 8.7 ปีคือ accounting payback สำหรับเงินลงทุนรวม 6MB (Loan 2 5MB + equity ครอบครัว 1MB) แต่ <strong style="color:var(--green)">เงิน 1MB ของครอบครัวคืนภายใน 17 เดือน</strong> หลังเปิดโรงแรม ตั้งแต่ปีที่ 2 โรงแรม self-sustaining และครอบครัวสามารถถอน 20,000–30,000 บาท/เดือนได้โดยไม่กระทบการดำเนินงาน หาก <strong style="color:var(--teal)">ค่าเช่าชั้น 1 เข้ามาด้วย (~30K/เดือน)</strong> จะยิ่งเร็วกว่านี้</p>
+  </div>
+</div>
+
+<!-- ======== PAGE: TIMELINE ======== -->
+<div class="page" id="page-timeline">
+
+  <div class="alert alert-red">
+    <span class="alert-icon">⏰</span>
+    <div><strong>Critical Path:</strong> Loan 2 → ผู้รับเหมา → MEP → เปิดโรงแรม ธ.ค. 2569 เส้นตายทุก 1 สัปดาห์ที่ล่าช้า = ล่าช้า 1 สัปดาห์ ต้นทุนล่าช้า = 117,800 บาท/เดือน</div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-gold">
+      <div class="kpi-label">เปิดเป้าหมาย</div>
+      <div class="kpi-value">ธ.ค. 69</div>
+      <div class="kpi-sub">อีก 7 เดือน</div>
+    </div>
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-label">เวลาที่มี</div>
+      <div class="kpi-value">30.6</div>
+      <div class="kpi-sub">สัปดาห์</div>
+    </div>
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">Burn Rate ล่าช้า</div>
+      <div class="kpi-value">117.8K</div>
+      <div class="kpi-sub">บาท/เดือน</div>
+    </div>
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-label">ใบอนุญาตก่อสร้าง</div>
+      <div class="kpi-value">✅</div>
+      <div class="kpi-sub">อนุมัติแล้ว</div>
+    </div>
+  </div>
+
+  <div class="section-title">สถานะ Milestone หลัก</div>
+  <div class="card">
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--orange)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">P0-001: ยื่นขอ Loan 2</div>
+        <div class="timeline-meta">พ.ค. 2569 · In Progress · <span style="color:var(--orange)">⚠️ Critical</span></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--red)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">P0-002: ธนาคารอนุมัติ Loan 2</div>
+        <div class="timeline-meta">มิ.ย. 2569 · Pending · <span style="color:var(--red)">🚨 Critical Path</span></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--orange)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">P0-004: ยื่นแก้ใบอนุญาตโรงแรม</div>
+        <div class="timeline-meta">พ.ค. 2569 · In Progress</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--red)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">P0-003: เซ็นสัญญาผู้รับเหมา</div>
+        <div class="timeline-meta">มิ.ย.–ก.ค. 2569 · Searching · <span style="color:var(--red)">🚨 ล่าช้าทุกสัปดาห์</span></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--text3)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">P1: Structural (รื้อถอน + บันไดหนีไฟ)</div>
+        <div class="timeline-meta">ก.ค.–ส.ค. 2569 · Not Started</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--text3)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">P2: MEP (ไฟ + ประปา + แอร์)</div>
+        <div class="timeline-meta">ส.ค.–ต.ค. 2569 · Not Started · <span style="color:var(--orange)">⚠️ Controls downstream</span></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--text3)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">P3: Bathrooms (ขยาย + กันซึม)</div>
+        <div class="timeline-meta">ก.ย.–พ.ย. 2569 · Not Started · <span style="color:var(--orange)">⚠️ ต้องบ่ม 7 วัน</span></div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--text3)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">P4: Interior + Exterior</div>
+        <div class="timeline-meta">ต.ค.–พ.ย. 2569 · Not Started</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--text3)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">P5: FF&E + Technology</div>
+        <div class="timeline-meta">พ.ย.–ธ.ค. 2569 · Not Started</div>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-dot" style="background:var(--text3)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title">P6: OTA Setup + Staff Training</div>
+        <div class="timeline-meta">พ.ย.–ธ.ค. 2569 · Not Started · <span style="color:var(--orange)">⚠️ ต้อง 4-6 สัปดาห์ก่อนเปิด</span></div>
+      </div>
+    </div>
+    <div class="timeline-item" style="border-bottom:none;">
+      <div class="timeline-dot" style="background:var(--gold);box-shadow:0 0 8px var(--gold)"></div>
+      <div class="timeline-content">
+        <div class="timeline-title" style="color:var(--gold)">🎉 SOFT OPENING — เป้าหมาย</div>
+        <div class="timeline-meta" style="color:var(--gold)">ธ.ค. 2569</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">สถานการณ์ล่าช้า</div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <table class="data-table">
+      <thead><tr><th>Scenario</th><th>เปิดเดือน</th><th>ฤดูกาล</th><th>ต้นทุนเพิ่ม</th></tr></thead>
+      <tbody>
+        <tr><td>Base (ตรงเวลา)</td><td>ธ.ค. 69</td><td><span class="badge badge-gold">Peak ✅</span></td><td class="mono">—</td></tr>
+        <tr><td>Delay 1 (L2 ช้า)</td><td>ก.พ. 70</td><td><span class="badge badge-blue">Late Peak</span></td><td class="mono orange" style="color:var(--orange)">+157,800</td></tr>
+        <tr><td>Delay 2 (Contractor ช้า)</td><td>เม.ย. 70</td><td><span class="badge" style="background:rgba(124,58,237,0.1);color:var(--purple)">Shoulder</span></td><td class="mono orange" style="color:var(--orange)">+315,600</td></tr>
+        <tr><td>Delay 3 (Worst Case)</td><td>ก.ค. 70</td><td><span class="badge badge-red">Low Season 🚨</span></td><td class="mono red" style="color:var(--red)">+552,300</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="footnote">
+  Hotel Yoo & Co · Phuket Old Town, Takuapa Road · Survival & Feasibility Model v1.0<br>
+  จัดทำโดย Suthida · อัปเดตล่าสุด 4 พ.ค. 2569 · ตัวเลขทั้งหมดหน่วยบาท<br>
+  <span style="color:var(--border2)">⚠️ ตัวเลข CAPEX เป็นประมาณการ รอ BOQ จริงจากผู้รับเหมา</span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ===== DATA =====
+const months = ['ธ.ค.69','ม.ค.70','ก.พ.70','มี.ค.70','เม.ย.70','พ.ค.70','มิ.ย.70','ก.ค.70','ส.ค.70','ก.ย.70','ต.ค.70','พ.ย.70','ธ.ค.70','ม.ค.71','ก.พ.71','มี.ค.71','เม.ย.71','พ.ค.71','มิ.ย.71','ก.ค.71','ส.ค.71','ก.ย.71','ต.ค.71','พ.ย.71','ธ.ค.71','ม.ค.72','ก.พ.72','มี.ค.72','เม.ย.72','พ.ค.72','มิ.ย.72','ก.ค.72','ส.ค.72','ก.ย.72','ต.ค.72','พ.ย.72'];
+
+const closingCash = [-85700,11211.4,150512.2,280241.2,379752,407874,343578,276573,212277,147981,136498,271558,541257,810957,1052990,1199610,1248991,1184247,1116763,1052019,987276,919791,976102,1112870,1390677,1668485,1903839,2055741,2108169,2043912,1976850,1912593,1848335,1781274,1840791,1982613];
+
+const revenue = [254336,296726,287154,256636,184947,83979,81270,83979,83979,81270,212347,292185,428823,428823,401157,305435,207887,84956,82215,84956,84956,82215,214816,295583,438681,438681,396228,312457,212666,86909,84105,86909,86909,84105,219754,302378];
+
+const fcf = [96911,139301,129729,99511,28122,-64296,-67005,-64296,-64296,-67005,55522,135060,269699,269699,242033,146621,49381,-64744,-67484,-64744,-64744,-67484,56310,136768,277808,277808,235355,151902,52429,-64258,-67061,-64258,-64258,-67061,59517,141822];
+
+const debtSvc = Array(36).fill(97800);
+const opex = [59625,59625,59625,59325,59025,50475,50475,50475,50475,50475,59025,59325,61324,61324,61324,61015,60706,51899,51899,51899,51899,51899,60706,61015,63073,63073,63073,62755,62437,53366,53366,53366,53366,53366,62437,62755];
+
+// CHART CONFIG
+const defaultFont = { family: "'Space Mono', monospace", size: 10 };
+Chart.defaults.color = '#4a5f7a';
+Chart.defaults.font = defaultFont;
+Chart.defaults.plugins.legend.display = false;
+
+function makeGradient(ctx, color, alpha1=0.3, alpha2=0) {
+  const g = ctx.createLinearGradient(0,0,0,200);
+  g.addColorStop(0, color.replace(')', `,${alpha1})`).replace('rgb','rgba'));
+  g.addColorStop(1, color.replace(')', `,${alpha2})`).replace('rgb','rgba'));
+  return g;
+}
+
+const gridColor = 'rgba(200,214,232,0.6)';
+const baseOpts = {
+  responsive: true, maintainAspectRatio: true,
+  animation: { duration: 800 },
+  plugins: { legend: { display: false }, tooltip: {
+    backgroundColor: '#ffffff', borderColor: '#c8d6e8', borderWidth: 1,
+    titleFont: { family: "'Space Mono', monospace", size: 11 }, titleColor: '#1a2234',
+    bodyFont: { family: "'DM Sans', sans-serif", size: 11 }, bodyColor: '#4a5f7a',
+    callbacks: {
+      label: ctx => ' ฿' + Math.round(ctx.raw).toLocaleString()
+    }
+  }},
+  scales: {
+    x: { grid: { color: gridColor }, ticks: { maxRotation: 45, font: defaultFont } },
+    y: { grid: { color: gridColor }, ticks: { font: defaultFont, callback: v => '฿' + (v/1000).toFixed(0) + 'K' } }
+  }
+};
+
+// ===== CASHFLOW CHART =====
+(function() {
+  const ctx = document.getElementById('cashflowChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,220);
+  grad.addColorStop(0,'rgba(10,158,134,0.18)');
+  grad.addColorStop(1,'rgba(34,211,180,0)');
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        data: closingCash,
+        borderColor: '#22d3b4', borderWidth: 2,
+        backgroundColor: grad, fill: true,
+        pointRadius: 3, pointBackgroundColor: closingCash.map(v => v < 300000 ? '#ff4d6d' : '#22d3b4'),
+        tension: 0.4
+      }]
+    },
+    options: {
+      ...baseOpts,
+      plugins: {
+        ...baseOpts.plugins,
+        annotation: {}
+      },
+      scales: {
+        ...baseOpts.scales,
+        y: {
+          ...baseOpts.scales.y,
+          ticks: { ...baseOpts.scales.y.ticks, callback: v => '฿' + (v/1000000).toFixed(1) + 'M' }
+        }
+      }
+    }
+  });
+
+  // Red reference line annotation manually via plugin
+})();
+
+// ===== FCF CHART =====
+(function() {
+  const ctx = document.getElementById('fcfChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        data: fcf,
+        backgroundColor: fcf.map(v => v >= 0 ? 'rgba(22,163,74,0.55)' : 'rgba(217,35,74,0.55)'),
+        borderColor: fcf.map(v => v >= 0 ? '#4ade80' : '#ff4d6d'),
+        borderWidth: 1, borderRadius: 3
+      }]
+    },
+    options: baseOpts
+  });
+})();
+
+// ===== REVENUE CHART =====
+(function() {
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,220);
+  grad.addColorStop(0,'rgba(196,154,0,0.22)');
+  grad.addColorStop(1,'rgba(245,200,66,0)');
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [
+        {
+          label: 'Revenue',
+          data: revenue,
+          borderColor: '#f5c842', borderWidth: 2,
+          backgroundColor: grad, fill: true,
+          pointRadius: 2, tension: 0.4
+        },
+        {
+          label: 'Survival Floor',
+          data: Array(36).fill(105030),
+          borderColor: 'rgba(217,35,74,0.55)', borderWidth: 1.5,
+          borderDash: [5,3],
+          pointRadius: 0, fill: false
+        }
+      ]
+    },
+    options: {
+      ...baseOpts,
+      plugins: {
+        ...baseOpts.plugins,
+        legend: {
+          display: true,
+          labels: { color: '#8899b5', font: { family: "'DM Sans'", size: 11 }, boxWidth: 20 }
+        }
+      }
+    }
+  });
+})();
+
+// ===== LOAN CHART =====
+(function() {
+  // Take every 12th month for loan schedule
+  const loanLabels = [];
+  const loanData = [];
+  const loanInterest = [];
+  const loanPrincipal = [];
+  // Generated from amortization: balance starts 5M, decreases
+  let bal = 5000000;
+  const rate1 = 0.0599/12, rate2 = 0.0725/12, pmt = 38900;
+  for (let i = 1; i <= 232; i++) {
+    const rate = i <= 36 ? rate1 : rate2;
+    const int = bal * rate;
+    const prin = Math.min(pmt - int, bal);
+    bal = Math.max(0, bal - prin);
+    if (i % 12 === 0 || i === 1 || i === 36 || i === 232) {
+      loanLabels.push('M' + i);
+      loanData.push(Math.round(bal));
+    }
+  }
+
+  const ctx = document.getElementById('loanChart').getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,200);
+  grad.addColorStop(0,'rgba(217,35,74,0.12)');
+  grad.addColorStop(1,'rgba(255,77,109,0)');
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: loanLabels,
+      datasets: [{
+        data: loanData,
+        borderColor: '#ff4d6d', borderWidth: 2,
+        backgroundColor: grad, fill: true,
+        pointRadius: 2, tension: 0.3
+      }]
+    },
+    options: {
+      ...baseOpts,
+      scales: {
+        x: { ...baseOpts.scales.x },
+        y: { ...baseOpts.scales.y, ticks: { ...baseOpts.scales.y.ticks, callback: v => '฿' + (v/1000000).toFixed(1) + 'M' } }
+      }
+    }
+  });
+})();
+
+// ===== CAPEX CHART =====
+(function() {
+  const ctx = document.getElementById('capexChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Structural','Electrical','Plumbing','Bathroom','AC','Interior','Exterior','FF&E','Technology','Signage/Permits','Contingency'],
+      datasets: [{
+        data: [650000,725000,425000,625000,335000,1050000,700000,535000,170000,150000,500000],
+        backgroundColor: ['#f5c842','#22d3b4','#60a5fa','#c084fc','#4ade80','#ff8c42','#ff4d6d','#818cf8','#34d399','#f472b6','#94a3b8'],
+        borderColor: '#ffffff', borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: true, position: 'right',
+          labels: { color: '#8899b5', font: { family: "'DM Sans'", size: 10 }, boxWidth: 12, padding: 8 }
+        },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.label}: ฿${ctx.raw.toLocaleString()}` }
+        }
+      }
+    }
+  });
+})();
+
+// ===== STRESS CHART =====
+(function() {
+  const ctx = document.getElementById('stressChart').getContext('2d');
+  const scenarios = ['S-001\nOcc-20%','S-002\nADR-25%','S-003\nDelay3M','S-004\nCAPEX+20%','S-005\nElec+50%','S-006\nRate9%','S-007\nCombined','S-008\nLowSeas','S-009\nOTA'];
+  const dscrs = [1.15, 1.04, 1.59, 1.59, 1.50, 1.38, 0.93, 1.59, 1.20];
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: scenarios,
+      datasets: [
+        {
+          label: 'DSCR',
+          data: dscrs,
+          backgroundColor: dscrs.map(v => v >= 1.35 ? 'rgba(22,163,74,0.55)' : v >= 1.0 ? 'rgba(217,106,16,0.5)' : 'rgba(255,77,109,0.8)'),
+          borderColor: dscrs.map(v => v >= 1.35 ? '#4ade80' : v >= 1.0 ? '#ff8c42' : '#ff4d6d'),
+          borderWidth: 1, borderRadius: 4
+        },
+        {
+          label: 'Target 1.35',
+          data: Array(9).fill(1.35),
+          type: 'line',
+          borderColor: 'rgba(255,77,109,0.7)', borderWidth: 1.5, borderDash: [5,3],
+          pointRadius: 0, fill: false
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#8899b5', font: { family: "'DM Sans'", size: 11 }, boxWidth: 20 }
+        },
+        tooltip: { callbacks: { label: ctx => ` DSCR: ${ctx.raw}` } }
+      },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { font: { family: "'DM Sans'", size: 9 } } },
+        y: {
+          grid: { color: gridColor },
+          min: 0, max: 2,
+          ticks: { font: defaultFont, callback: v => v.toFixed(1) + 'x' }
+        }
+      }
+    }
+  });
+})();
+
+// ===== WEALTH CHART =====
+(function() {
+  const ctx = document.getElementById('wealthChart').getContext('2d');
+  const years = ['เริ่มต้น','ปีที่ 1\n(ธ.ค.70)','ปีที่ 2\n(ธ.ค.71)','ปีที่ 3\n(ธ.ค.72)','Year 10\n(2578)'];
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: years,
+      datasets: [
+        {
+          label: 'Hotel FCF สะสม',
+          data: [0, 357258, 1198569, 2068313, 0],
+          backgroundColor: 'rgba(22,163,74,0.55)', borderColor: '#4ade80', borderWidth: 1, borderRadius: 3
+        },
+        {
+          label: 'มูลค่าอสังหาฯ',
+          data: [8000000, 8400000, 8820000, 9261000, 13031157],
+          type: 'line',
+          borderColor: '#f5c842', borderWidth: 2,
+          pointBackgroundColor: '#f5c842', pointRadius: 4,
+          fill: false, tension: 0.4, yAxisID: 'y2'
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: '#8899b5', font: { family: "'DM Sans'", size: 11 }, boxWidth: 16 }
+        },
+        tooltip: { callbacks: { label: ctx => ` ฿${Math.round(ctx.raw).toLocaleString()}` } }
+      },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { font: { family: "'DM Sans'", size: 10 } } },
+        y: {
+          grid: { color: gridColor }, position: 'left',
+          ticks: { font: defaultFont, callback: v => '฿' + (v/1000000).toFixed(1) + 'M' }
+        },
+        y2: {
+          position: 'right', grid: { display: false },
+          ticks: { font: defaultFont, callback: v => '฿' + (v/1000000).toFixed(1) + 'M', color: '#f5c842' }
+        }
+      }
+    }
+  });
+})();
+
+// ===== REVPAR CHART =====
+(function() {
+  const ctx = document.getElementById('revparChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['ปีที่ 1', 'ปีที่ 2', 'ปีที่ 3'],
+      datasets: [
+        {
+          label: '🏠 Private — Gross',
+          data: [931, 936, 931],
+          backgroundColor: 'rgba(196,154,0,0.55)', borderColor: '#c49a00', borderWidth: 1.5, borderRadius: 3
+        },
+        {
+          label: '🏠 Private — Net after OTA',
+          data: [801, 815, 829],
+          backgroundColor: 'rgba(37,99,235,0.5)', borderColor: '#2563eb', borderWidth: 1.5, borderRadius: 3
+        },
+        {
+          label: '🏠 Private — Adj Net (pocket)',
+          data: [660, 815, 829],
+          backgroundColor: 'rgba(22,163,74,0.6)', borderColor: '#16a34a', borderWidth: 1.5, borderRadius: 3
+        },
+        {
+          label: '🛏 Dorm — Gross',
+          data: [288, 289, 288],
+          backgroundColor: 'rgba(196,154,0,0.22)', borderColor: '#c49a00', borderWidth: 1.5, borderRadius: 3
+        },
+        {
+          label: '🛏 Dorm — Net after OTA',
+          data: [247, 251, 256],
+          backgroundColor: 'rgba(37,99,235,0.22)', borderColor: '#2563eb', borderWidth: 1.5, borderRadius: 3
+        },
+        {
+          label: '🛏 Dorm — Adj Net (pocket)',
+          data: [206, 251, 256],
+          backgroundColor: 'rgba(10,158,134,0.55)', borderColor: '#0a9e86', borderWidth: 1.5, borderRadius: 3
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: true, position: 'bottom',
+          labels: { color: '#4a5f7a', font: { family: "'DM Sans'", size: 10 }, boxWidth: 12, padding: 8 }
+        },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ฿${ctx.raw}/คืน` } }
+      },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { font: defaultFont } },
+        y: {
+          grid: { color: gridColor }, min: 0, max: 1050,
+          ticks: { font: defaultFont, callback: v => '฿' + v }
+        }
+      }
+    }
+  });
+})();
+
+// ===== TAB NAVIGATION =====
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.target.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
